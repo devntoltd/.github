@@ -18,8 +18,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Every checkout sets persist-credentials: false: no later step needs GITHUB_TOKEN in .git/config, and
-  # downloaded binaries run in every job.
+  # Every checkout sets persist-credentials: false, so GITHUB_TOKEN is not left in .git/config: no step after the
+  # checkout needs it there, and the release binaries each job downloads and runs could read it.
 
   workflows:
     name: Workflow lint
@@ -30,9 +30,25 @@ jobs:
         with:
           persist-credentials: false
 
+      # Guard, keep it: the ruleset requires this workflow in every repository, also in a new or docs-only one with
+      # nothing to lint, and there actionlint and zizmor both fail (exit 3: "no project was found", "no inputs
+      # collected"). Each runs only when the repository has files it checks: actionlint the workflows, zizmor also
+      # the action metadata files and the Dependabot config.
+      - name: Find workflow files
+        id: inputs
+        run: |
+          workflows=$(git ls-files -- ':(glob).github/workflows/*.yml' ':(glob).github/workflows/*.yaml')
+          others=$(git ls-files -- ':(glob)**/action.yml' ':(glob)**/action.yaml' .github/dependabot.yml .github/dependabot.yaml)
+          if [ -n "$workflows" ]; then actionlint=true; else actionlint=false; fi
+          if [ -n "$workflows$others" ]; then zizmor=true; else zizmor=false; fi
+          echo "actionlint=$actionlint" >> "$GITHUB_OUTPUT"
+          echo "zizmor=$zizmor" >> "$GITHUB_OUTPUT"
+          echo "actionlint: $actionlint, zizmor: $zizmor"
+
       # Shell scripts of the run: steps, checked through actionlint below. Pinned like actionlint instead of the
       # runner's copy, so a new runner image cannot change the result.
       - name: shellcheck
+        if: steps.inputs.outputs.actionlint == 'true'
         env:
           VERSION: 0.11.0
           SHA256: b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6
@@ -45,6 +61,7 @@ jobs:
       # Correctness of the workflows of the repository: expression types, action inputs, shellcheck on run: scripts.
       # The release binary is pinned by version and SHA-256 (the digest GitHub shows for the release asset).
       - name: actionlint
+        if: steps.inputs.outputs.actionlint == 'true'
         env:
           VERSION: 1.7.12
           SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
@@ -60,6 +77,7 @@ jobs:
       # team's pull requests. advanced-security: false because code scanning needs GitHub Advanced Security on private
       # repositories.
       - name: zizmor
+        if: steps.inputs.outputs.zizmor == 'true'
         uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
         with:
           version: 1.31.1
@@ -76,9 +94,9 @@ jobs:
           fetch-depth: 0 # the commits of the pull request need their base
           persist-credentials: false
 
-      # Only the commits of the pull request (or of the merge queue entry), so the check stays fast in large
-      # repositories; the full history is scanned once per repository by hand. The SHAs come through env:, never
-      # interpolated into the script. --redact keeps a found secret out of the job log. --validation is off on purpose:
+      # Scans only the commits of the pull request (or of the merge queue entry), so the check stays fast in large
+      # repositories; the history from before the ruleset is scanned once per repository by hand. The SHAs come
+      # through env:, never interpolated into the script. --redact keeps a found secret out of the job log. --validation is off on purpose:
       # it would send what it finds to the providers' APIs. The release binary is pinned by version and SHA-256.
       - name: Betterleaks
         env:
