@@ -54,7 +54,7 @@ jobs:
           SHA256: b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6
         run: |
           archive="$RUNNER_TEMP/shellcheck.tar.gz"
-          curl -fsSL -o "$archive" "https://github.com/koalaman/shellcheck/releases/download/v${VERSION}/shellcheck-v${VERSION}.linux.x86_64.tar.gz"
+          curl -fsSL --retry 5 --retry-delay 15 --retry-all-errors -o "$archive" "https://github.com/koalaman/shellcheck/releases/download/v${VERSION}/shellcheck-v${VERSION}.linux.x86_64.tar.gz"
           echo "${SHA256}  ${archive}" | sha256sum --check --strict
           tar -xzf "$archive" -C "$RUNNER_TEMP" --strip-components=1 "shellcheck-v${VERSION}/shellcheck"
 
@@ -67,7 +67,7 @@ jobs:
           SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
         run: |
           archive="$RUNNER_TEMP/actionlint.tar.gz"
-          curl -fsSL -o "$archive" "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/actionlint_${VERSION}_linux_amd64.tar.gz"
+          curl -fsSL --retry 5 --retry-delay 15 --retry-all-errors -o "$archive" "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/actionlint_${VERSION}_linux_amd64.tar.gz"
           echo "${SHA256}  ${archive}" | sha256sum --check --strict
           tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
           "$RUNNER_TEMP/actionlint" -color -shellcheck="$RUNNER_TEMP/shellcheck"
@@ -106,7 +106,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
         run: |
           archive="$RUNNER_TEMP/betterleaks.tar.gz"
-          curl -fsSL -o "$archive" "https://github.com/betterleaks/betterleaks/releases/download/v${VERSION}/betterleaks_${VERSION}_linux_x64.tar.gz"
+          curl -fsSL --retry 5 --retry-delay 15 --retry-all-errors -o "$archive" "https://github.com/betterleaks/betterleaks/releases/download/v${VERSION}/betterleaks_${VERSION}_linux_x64.tar.gz"
           echo "${SHA256}  ${archive}" | sha256sum --check --strict
           tar -xzf "$archive" -C "$RUNNER_TEMP" betterleaks
           "$RUNNER_TEMP/betterleaks" git --redact --verbose --no-banner --log-opts="$BASE_SHA..$HEAD_SHA" .
