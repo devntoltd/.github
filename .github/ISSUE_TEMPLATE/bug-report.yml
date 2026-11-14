@@ -1,0 +1,44 @@
+name: Bug report
+description: Something does not work as documented, or fails where it should not.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. A security problem goes through the repository's **Security** tab or the [security policy](https://github.com/devntoltd/.github/blob/main/SECURITY.md) instead, never into an issue.
+        Remove names, logins, URLs, tokens and anything else private from what you paste.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what happened, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence of steps or commands that shows the problem.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release, tag or commit you used.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system and the versions of the tools involved.
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The relevant error message or log lines, with private values removed.
+      render: text

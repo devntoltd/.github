@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  # No security entry: GitHub adds its own to the chooser from SECURITY.md and private vulnerability reporting.
+  - name: Questions and support
+    url: https://github.com/devntoltd/.github/blob/main/SUPPORT.md
+    about: Where to ask a question or raise a private matter.

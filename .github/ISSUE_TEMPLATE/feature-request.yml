@@ -1,0 +1,26 @@
+name: Feature request
+description: A new capability, or an improvement to an existing one.
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the repository's README for what it does and does not cover, and search the existing issues first.
+  - type: textarea
+    id: need
+    attributes:
+      label: What you need
+      description: The problem you want solved and why it matters to you; not yet the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How you would solve it, if you have an idea.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other ways you considered or use today, and why they fall short.
