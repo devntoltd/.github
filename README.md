@@ -26,11 +26,13 @@ This repository is public, as GitHub requires for the defaults: nothing internal
 Setup, once per clone:
 
 ```powershell
-winget install EditorConfig-Checker.EditorConfig-Checker lycheeverse.lychee Betterleaks.Betterleaks
+winget install EditorConfig-Checker.EditorConfig-Checker lycheeverse.lychee Betterleaks.Betterleaks Python.Python.3.13
+py -m pip install --user pipx                 # runs check-jsonschema, the issue forms check
+py -m pipx ensurepath                         # puts pipx on PATH; open a new terminal afterwards
 git config --local core.hooksPath .githooks   # the pre-commit hook scans the staged changes for secrets
 ```
 
-Markdown lint needs Node.js, the issue forms check Python with pipx. VS Code offers the recommended extensions (`.vscode/extensions.json`) when the folder is opened; the YAML extension checks the issue forms while typing.
+Markdown lint needs Node.js. VS Code offers the recommended extensions (`.vscode/extensions.json`) when the folder is opened; the YAML extension checks the issue forms while typing.
 
 The checks, as CI runs them; in VS Code **Terminal → Run Task…** has each, and **Ctrl+Shift+B** runs *All checks*:
 
