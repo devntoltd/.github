@@ -18,3 +18,31 @@ Organization-wide files of devntoltd.
 GitHub shows a default file in every repository of the organization that has no file of its own of the same kind. It replaces the whole file, never merges: a repository with its own `.github/ISSUE_TEMPLATE/` shows none of the organization's forms. Links in these files are absolute, since the same file is shown in every repository. The forms use only the labels `bug` and `enhancement`, which every new repository has.
 
 This repository is public, as GitHub requires for the defaults: nothing internal goes here.
+
+## Changing this repository
+
+`CONTRIBUTING.md` here is the default of every repository; what applies to this one only is in this section. A change goes through a pull request; `.github/workflows/ci.yml` checks the files on every pull request, and the organization checks (workflow lint, secret scan) run as everywhere.
+
+Setup, once per clone:
+
+```powershell
+winget install EditorConfig-Checker.EditorConfig-Checker lycheeverse.lychee Betterleaks.Betterleaks Python.Python.3.13 Microsoft.PowerShell
+py -m pip install --user pipx                 # runs check-jsonschema, the issue forms check
+py -m pipx ensurepath                         # puts pipx on PATH; open a new terminal afterwards
+git config --local core.hooksPath .githooks   # the pre-commit hook scans the staged changes for secrets
+```
+
+Markdown lint needs Node.js. VS Code offers the recommended extensions (`.vscode/extensions.json`) when the folder is opened; the YAML extension checks the issue forms while typing.
+
+The checks, as CI runs them; in VS Code **Terminal → Run Task…** has each, and **Ctrl+Shift+B** runs *All checks*:
+
+```powershell
+editorconfig-checker                      # every file against .editorconfig; must print nothing
+npx markdownlint-cli2@0.23.3              # must report 0 issues (config: .markdownlint-cli2.jsonc)
+lychee --offline --include-fragments --remap "https://github\.com/devntoltd/\.github/blob/main/(.*) $(([uri]$PWD.Path).AbsoluteUri)/`$1" './**/*.md' './.github/**/*.md'   # links to files of this repository and their anchors
+pipx run check-jsonschema==0.39.0 --builtin-schema vendor.github-issue-forms .github/ISSUE_TEMPLATE/bug-report.yml .github/ISSUE_TEMPLATE/feature-request.yml
+pipx run check-jsonschema==0.39.0 --builtin-schema vendor.github-issue-config .github/ISSUE_TEMPLATE/config.yml
+betterleaks git --redact --verbose .      # secrets in the full git history
+```
+
+A link in these files is absolute, since every repository shows it; the links check reads a link to a file of this repository (`https://github.com/devntoltd/.github/blob/main/...`) from the working tree, so a new file or anchor is checked before the merge. Other external links are not checked. The versions are those of `ci.yml`; Dependabot updates only the actions, so a tool version is raised by hand in `ci.yml`, `.vscode/tasks.json` and here together.
