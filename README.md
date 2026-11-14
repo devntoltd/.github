@@ -26,7 +26,7 @@ This repository is public, as GitHub requires for the defaults: nothing internal
 Setup, once per clone:
 
 ```powershell
-winget install EditorConfig-Checker.EditorConfig-Checker lycheeverse.lychee Betterleaks.Betterleaks Python.Python.3.13
+winget install EditorConfig-Checker.EditorConfig-Checker lycheeverse.lychee Betterleaks.Betterleaks Python.Python.3.13 Microsoft.PowerShell
 py -m pip install --user pipx                 # runs check-jsonschema, the issue forms check
 py -m pipx ensurepath                         # puts pipx on PATH; open a new terminal afterwards
 git config --local core.hooksPath .githooks   # the pre-commit hook scans the staged changes for secrets

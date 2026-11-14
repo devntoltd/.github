@@ -38,7 +38,7 @@
       "args": [
         "-NoProfile",
         "-Command",
-        "$root = ([uri](Get-Location).Path).AbsoluteUri; lychee --offline --include-fragments --no-progress --remap \"https://github\\.com/devntoltd/\\.github/blob/main/(.*) $root/`$1\" './**/*.md' './.github/**/*.md'"
+        "$ErrorActionPreference = 'Stop'; $root = ([uri](Get-Location).Path).AbsoluteUri; lychee --offline --include-fragments --no-progress --remap \"https://github\\.com/devntoltd/\\.github/blob/main/(.*) $root/`$1\" './**/*.md' './.github/**/*.md'"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
@@ -51,7 +51,7 @@
       "args": [
         "-NoProfile",
         "-Command",
-        "$forms = Get-ChildItem .github/ISSUE_TEMPLATE/*.yml -Exclude config.yml | ForEach-Object FullName; pipx run check-jsonschema==0.39.0 --builtin-schema vendor.github-issue-forms @forms; if ($LASTEXITCODE) { exit $LASTEXITCODE }; pipx run check-jsonschema==0.39.0 --builtin-schema vendor.github-issue-config .github/ISSUE_TEMPLATE/config.yml; exit $LASTEXITCODE"
+        "$ErrorActionPreference = 'Stop'; $forms = Get-ChildItem .github/ISSUE_TEMPLATE/*.yml -Exclude config.yml | ForEach-Object FullName; pipx run check-jsonschema==0.39.0 --builtin-schema vendor.github-issue-forms @forms; if ($LASTEXITCODE) { exit $LASTEXITCODE }; pipx run check-jsonschema==0.39.0 --builtin-schema vendor.github-issue-config .github/ISSUE_TEMPLATE/config.yml; exit $LASTEXITCODE"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
