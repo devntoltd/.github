@@ -1,0 +1,70 @@
+name: CI
+
+# The checks of this repository's own files. Workflow lint and the secret scan run in the organization checks
+# (org-checks.yml), which the organization ruleset requires on every pull request; they are not repeated here.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege for GITHUB_TOKEN, whatever the organization default is.
+permissions:
+  contents: read
+
+# One run per pull request: a new push cancels the run of the previous one. A run of main has a group of its own commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # persist-credentials: false: no later step needs GITHUB_TOKEN in .git/config, and third-party code runs here.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # .editorconfig for every tracked file, every check on. The release is pinned by version and SHA-256, as in
+      # devntoltd/github-org-bootstrap; Dependabot does not update it.
+      - name: EditorConfig
+        env:
+          VERSION: 4.0.2
+          SHA256: 44efaef3ed14c6ab52eb87481d78e5e5c204796dccf26e2f4598a61ba17f8003
+        run: |
+          archive="$RUNNER_TEMP/editorconfig-checker.tar.gz"
+          curl -fsSL --retry 10 --retry-delay 30 --retry-max-time 300 -o "$archive" "https://github.com/editorconfig-checker/editorconfig-checker/releases/download/v${VERSION}/editorconfig-checker-linux-amd64.tar.gz"
+          echo "${SHA256}  ${archive}" | sha256sum --check --strict
+          tar -xzf "$archive" -C "$RUNNER_TEMP" editorconfig-checker
+          "$RUNNER_TEMP/editorconfig-checker"
+
+      # Node.js is preinstalled on the runner; the version is pinned so a new release cannot fail an unchanged tree.
+      - name: Markdown lint
+        run: npx --yes markdownlint-cli2@0.23.3
+
+      # The links of these files are absolute, since every repository shows them. A link to a file of this repository
+      # (https://github.com/devntoltd/.github/blob/main/...) is remapped to the file in the checkout, so a missing file
+      # or #anchor fails, also for a file this pull request adds. Other external links are not checked (--offline), as
+      # in devntoltd/github-org-bootstrap. The action runs args through eval: the remap is single-quoted.
+      - name: Markdown links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          lycheeVersion: v0.24.2
+          args: >-
+            --offline --include-fragments --no-progress
+            --remap 'https://github\.com/devntoltd/\.github/blob/main/(.*) file://${{ github.workspace }}/$1'
+            './**/*.md' './.github/**/*.md'
+          fail: true
+
+      # The issue forms and the chooser config against GitHub's schemas, vendored in check-jsonschema (pinned version;
+      # pipx is preinstalled on the runner). GitHub itself hides an invalid form without an error.
+      - name: Issue forms
+        env:
+          VERSION: 0.39.0
+        run: |
+          find .github/ISSUE_TEMPLATE -name '*.yml' ! -name config.yml -print0 | xargs -0 pipx run "check-jsonschema==${VERSION}" --builtin-schema vendor.github-issue-forms
+          pipx run "check-jsonschema==${VERSION}" --builtin-schema vendor.github-issue-config .github/ISSUE_TEMPLATE/config.yml

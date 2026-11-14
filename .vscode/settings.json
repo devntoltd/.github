@@ -1,0 +1,8 @@
+{
+  // The YAML extension checks the issue forms and the chooser config while typing, against the SchemaStore schemas
+  // that check-jsonschema vendors for CI.
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-issue-forms.json": [".github/ISSUE_TEMPLATE/*.yml", "!.github/ISSUE_TEMPLATE/config.yml"],
+    "https://json.schemastore.org/github-issue-config.json": ".github/ISSUE_TEMPLATE/config.yml"
+  }
+}
