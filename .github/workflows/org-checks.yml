@@ -1,5 +1,5 @@
 # Reference copy of the central workflow. The running copy is .github/workflows/org-checks.yml of the organization's
-# .github repository, which the organization ruleset of 00-github requires on every pull request. A change starts here:
+# .github repository, which the organization ruleset of the engine requires on every pull request. A change starts here:
 # copy the file to .github by a pull request there, then put the merge commit of that pull request into the ruleset's
 # sha in github.json. Tool versions and SHA-256 sums are those of dev-tools.psd1 and ci.yml (a test keeps them equal).
 name: Organization checks
